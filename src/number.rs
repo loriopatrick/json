@@ -350,12 +350,19 @@ impl<'de> Deserialize<'de> for Number {
                 Ok(value.into())
             }
 
+            #[cfg(not(feature = "arbitrary_precision"))]
             #[inline]
             fn visit_f64<E>(self, value: f64) -> Result<Number, E>
             where
                 E: de::Error,
             {
                 Number::from_f64(value).ok_or_else(|| de::Error::custom("not a JSON number"))
+            }
+
+            #[cfg(feature = "arbitrary_precision")]
+            #[inline]
+            fn visit_str<E>(self, v: &str) -> Result<Number, E> {
+                Ok(Number { n: String::from(v) })
             }
 
             #[cfg(feature = "arbitrary_precision")]
